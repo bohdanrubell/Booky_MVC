@@ -31,6 +31,7 @@ namespace BookyWeb_Razor.Pages.Categories
             {
                 _db.Categories.Update(Category);
                 _db.SaveChanges();
+                TempData["success"] = "Category updated successfully";
                 return RedirectToPage("Index");
             }
 

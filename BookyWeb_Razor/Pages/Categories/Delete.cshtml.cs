@@ -29,6 +29,7 @@ namespace BookyWeb_Razor.Pages.Categories
             Category? category = _db.Categories.Find(Category.Id);
             _db.Categories.Remove(category);
             _db.SaveChanges();
+            TempData["success"] = "Category deleted successfully";
             return RedirectToPage("Index");
         }
     }
