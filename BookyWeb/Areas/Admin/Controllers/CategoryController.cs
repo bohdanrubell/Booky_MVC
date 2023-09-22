@@ -3,8 +3,9 @@ using Booky.DataAccess.Repository.IRepository;
 using Booky.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BookyWeb.Controllers
+namespace BookyWeb.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

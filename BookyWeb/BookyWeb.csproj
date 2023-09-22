@@ -13,12 +13,17 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0-rc.1.23461.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Booky.DataAccess\Booky.DataAccess.csproj" />
     <ProjectReference Include="..\Booky.Models\Booky.Models.csproj" />
     <ProjectReference Include="..\Booky.Utility\Booky.Utility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
