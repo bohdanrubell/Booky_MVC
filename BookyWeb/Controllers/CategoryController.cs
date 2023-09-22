@@ -1,5 +1,5 @@
-﻿using BookyWeb.Data;
-using BookyWeb.Models;
+﻿using Booky.DataAccess.Data;
+using Booky.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookyWeb.Controllers

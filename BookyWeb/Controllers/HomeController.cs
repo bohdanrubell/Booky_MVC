@@ -1,4 +1,4 @@
-using BookyWeb.Models;
+using Booky.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 

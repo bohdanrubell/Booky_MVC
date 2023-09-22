@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace BookyWeb.Migrations
+namespace Booky.DataAccess.Migrations
 {
     /// <inheritdoc />
     public partial class AddCategoryTableToDb : Migration
