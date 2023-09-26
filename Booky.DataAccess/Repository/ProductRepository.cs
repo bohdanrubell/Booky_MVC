@@ -20,7 +20,23 @@ namespace Booky.DataAccess.Repository
 
         public void Update(Product product)
         {
-            _db.Products.Update(product);
+            var prodFromDB = _db.Products.FirstOrDefault(u=> u.Id == product.Id);
+            if (prodFromDB != null)
+            {
+                prodFromDB.Title = product.Title;
+                prodFromDB.ISBN = product.ISBN;
+                prodFromDB.Price = product.Price;
+                prodFromDB.Price50 = product.Price50;
+                prodFromDB.ListPrice = product.ListPrice;
+                prodFromDB.Price100 = product.Price100;
+                prodFromDB.Description = product.Description;
+                prodFromDB.CategoryId = product.CategoryId;
+                prodFromDB.Author = product.Author;
+                if(prodFromDB.ImageUrl != null)
+                {
+                    prodFromDB.ImageUrl = product.ImageUrl;
+                }
+            }
         }
     }
 }

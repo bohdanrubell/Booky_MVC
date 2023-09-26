@@ -10,19 +10,21 @@ namespace BookyWeb.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        public ProductController(IUnitOfWork unitOfWork)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
-            List<Product> objCategoryList = _unitOfWork.Product.GetAll().ToList();
+            List<Product> objCategoryList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
             return View(objCategoryList);
         }
 
-        public IActionResult Create()
+        public IActionResult Upsert(int? id)
         {
-          
+
             ProductVM productVM = new()
             {
                 CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
@@ -32,14 +34,58 @@ namespace BookyWeb.Areas.Admin.Controllers
                 }),
                 Product = new Product()
             };
-            return View(productVM);
+            if (id == null || id == 0)
+            {
+                //create
+                return View(productVM);
+            }
+            else
+            {
+                //update
+                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id);
+                return View(productVM);
+            }
+
         }
         [HttpPost]
-        public IActionResult Create(ProductVM productVM)
+        public IActionResult Upsert(ProductVM productVM, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.Product.Add(productVM.Product);
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if (file != null)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    string productPart = Path.Combine(wwwRootPath, @"images/product");
+
+                    if (!string.IsNullOrEmpty(productVM.Product.ImageUrl))
+                    {
+                        //delete the old image
+                        var oldTmagePath = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+
+                        if (System.IO.File.Exists(oldTmagePath))
+                        {
+                            System.IO.File.Delete(oldTmagePath);
+                        }
+                    }
+
+                    using (var fileStream = new FileStream(Path.Combine(productPart, fileName), FileMode.Create))
+                    {
+                        file.CopyTo(fileStream);
+                    }
+
+                    productVM.Product.ImageUrl = @"\images\product\" + fileName;
+                }
+
+                if (productVM.Product.Id == 0)
+                {
+                    _unitOfWork.Product.Add(productVM.Product);
+                }
+                else
+                {
+                    _unitOfWork.Product.Update(productVM.Product);
+                }
+
                 _unitOfWork.Save();
                 TempData["success"] = "Product created successfully";
                 return RedirectToAction("Index");
@@ -54,59 +100,37 @@ namespace BookyWeb.Areas.Admin.Controllers
                 return View(productVM);
             }
         }
-
-        public IActionResult Edit(int? id)
+        #region API CALLS
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            if (id == 0 || id == null)
-            {
-                return NotFound();
-            }
-            Product? productFromBase = _unitOfWork.Product.Get(u => u.Id == id);
-            if (productFromBase == null)
-            {
-                return NotFound();
-            }
-            return View(productFromBase);
+            List<Product> objCategoryList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+            return Json(new {data = objCategoryList});
         }
-        [HttpPost]
-        public IActionResult Edit(Product obj)
-        {
-            //if (ModelState.IsValid)
-            //{
-                _unitOfWork.Product.Update(obj);
-                _unitOfWork.Save();
-                TempData["success"] = "Category updated successfully";
-                return RedirectToAction("Index");
-            
-            //return View();
 
-        }
+        [HttpDelete]
         public IActionResult Delete(int? id)
         {
-            if (id == 0 || id == null)
+            var productToBeDel = _unitOfWork.Product.Get(u => u.Id == id);
+            if(productToBeDel == null)
             {
-                return NotFound();
+                return Json(new {success =  false, message = "Error while deleting"});
             }
-            Product? productFromBase = _unitOfWork.Product.Get(u => u.Id == id);
-            if (productFromBase == null)
-            {
-                return NotFound();
-            }
-            return View(productFromBase);
-        }
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeletePOST(int? id)
-        {
-            Product? obj = _unitOfWork.Product.Get(u => u.Id == id);
-            if (obj == null)
-            {
-                return NotFound();
-            }
-            _unitOfWork.Product.Remove(obj);
-            _unitOfWork.Save();
-            TempData["success"] = "Category deleted successfully";
-            return RedirectToAction("Index");
-        }
 
+
+            var oldTmagePath = Path.Combine(_webHostEnvironment.WebRootPath, 
+                productToBeDel.ImageUrl.TrimStart('\\'));
+
+            if (System.IO.File.Exists(oldTmagePath))
+            {
+                System.IO.File.Delete(oldTmagePath);
+            }
+
+            _unitOfWork.Product.Remove(productToBeDel);
+            _unitOfWork.Save();
+
+            return Json(new { success = true, message = "Delete successing!" });
+        }
+        #endregion
     }
 }
