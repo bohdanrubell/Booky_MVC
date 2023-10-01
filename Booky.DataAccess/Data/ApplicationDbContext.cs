@@ -7,13 +7,15 @@ namespace Booky.DataAccess.Data
 {
     public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options): base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-            
+
         }
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
+
+        public DbSet<Company> Companies { get; set; }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -111,6 +113,18 @@ namespace Booky.DataAccess.Data
                     ImageUrl = ""
                 }
                 );
+            modelBuilder.Entity<Company>().HasData(
+                new Company
+                {
+                    Id = 1,
+                    Name = "Banan`s CP",
+                    StreetAddress = "st. St Paul 22",
+                    City = "Chicago",
+                    State = "USA",
+                    PostalCode = "123",
+                    PhoneNumber = "+1 234 567"
+                }
+            );
         }
     }
 }
