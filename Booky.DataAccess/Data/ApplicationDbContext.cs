@@ -17,6 +17,8 @@ namespace Booky.DataAccess.Data
 
         public DbSet<Company> Companies { get; set; }
 
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

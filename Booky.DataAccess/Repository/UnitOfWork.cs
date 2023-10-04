@@ -15,12 +15,18 @@ namespace Booky.DataAccess.Repository
         public IProductRepository Product { get; private set; }
 
         public ICompanyRepository Company { get; private set; }
+
+        public IShoppingCartRepository ShoppingCart { get; private set; }
+
+        public IApplicationRepository ApplicationUser { get; private set; }
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
             Category = new CategoryRepository(_db);
             Product = new ProductRepository(_db);
             Company = new CompanyRepository(_db);
+            ShoppingCart = new ShoppingCartRepostory(_db);  
+            ApplicationUser = new ApplicationUserRepository(_db);
         }
        
 
