@@ -10,18 +10,18 @@ using System.Threading.Tasks;
 
 namespace Booky.DataAccess.Repository
 {
-    public class ShoppingCartRepository : Repository<ShoppingCart>, IShoppingCartRepository
+    public class OrderHeaderRepository : Repository<OrderHeader>, IOrderHeaderRepository
     {
         private readonly ApplicationDbContext _db;
-        public ShoppingCartRepository(ApplicationDbContext db) : base(db)
+        public OrderHeaderRepository(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
 
 
-        public void Update(ShoppingCart obj)
+        public void Update(OrderHeader orderHeader)
         {
-            _db.ShoppingCarts.Update(obj);
+            _db.OrderHeaders.Update(orderHeader);
         }
     }
 }
