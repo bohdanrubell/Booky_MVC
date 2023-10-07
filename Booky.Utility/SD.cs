@@ -25,3 +25,4 @@ namespace Booky.Utility
         public const string PaymentStatusDelayedPayment = "ApprovedForDelayedPayment";
         public const string PaymentStatusRejected = "Rejected";
     }
+}
