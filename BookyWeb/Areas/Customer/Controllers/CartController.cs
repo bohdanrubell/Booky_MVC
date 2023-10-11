@@ -148,8 +148,8 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
-                            Currency = "usd",
+                            UnitAmount = (long)(item.Price * 100), // uah20.50 => 2050
+                            Currency = "uah",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = item.Product.Title
