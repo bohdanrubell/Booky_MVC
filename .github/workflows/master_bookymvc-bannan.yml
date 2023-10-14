@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'bookymvc-bannan'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_64EE7A37A2B44080818AE97482AEE312 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F5AC8B568A97480EADFB309E04C7E93A }}
           package: .
