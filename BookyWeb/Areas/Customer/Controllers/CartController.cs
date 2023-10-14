@@ -1,4 +1,4 @@
-﻿using Booky.DataAccess.Repository.IRepository;
+﻿    using Booky.DataAccess.Repository.IRepository;
 using Booky.Models.ViewModels;
 using Booky.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -189,7 +189,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
                     _unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
                     _unitOfWork.Save();
                 }
-
+                HttpContext.Session.Clear();
 
             }
 
