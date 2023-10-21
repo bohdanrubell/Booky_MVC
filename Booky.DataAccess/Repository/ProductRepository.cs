@@ -32,10 +32,11 @@ namespace Booky.DataAccess.Repository
                 prodFromDB.Description = product.Description;
                 prodFromDB.CategoryId = product.CategoryId;
                 prodFromDB.Author = product.Author;
-                if(prodFromDB.ImageUrl != null)
-                {
-                    prodFromDB.ImageUrl = product.ImageUrl;
-                }
+                prodFromDB.ProductImages = product.ProductImages;
+                //if(prodFromDB.ImageUrl != null)
+                //{
+                //    prodFromDB.ImageUrl = product.ImageUrl;
+                //}
             }
         }
     }

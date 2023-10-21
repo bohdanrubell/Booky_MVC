@@ -23,7 +23,7 @@ namespace BookyWeb.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            IEnumerable<Product> productsList = _unitOfWork.Product.GetAll(includeProperties: "Category");
+            IEnumerable<Product> productsList = _unitOfWork.Product.GetAll(includeProperties: "Category,ProductImages");
             return View(productsList);
         }
 
@@ -31,7 +31,7 @@ namespace BookyWeb.Areas.Customer.Controllers
         {
             ShoppingCart cart = new()
             {
-                Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category"),
+                Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category,ProductImages"),
                 Count = 1,
                 ProductId = productId
             };

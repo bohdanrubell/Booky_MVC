@@ -5,6 +5,7 @@ using Booky.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Stripe;
 
 namespace BookyWeb.Areas.Admin.Controllers
 {
@@ -21,7 +22,7 @@ namespace BookyWeb.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            List<Product> objCategoryList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+            List<Booky.Models.Product> objCategoryList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
             return View(objCategoryList);
         }
 
@@ -35,7 +36,7 @@ namespace BookyWeb.Areas.Admin.Controllers
                     Text = u.Name,
                     Value = u.Id.ToString()
                 }),
-                Product = new Product()
+                Product = new Booky.Models.Product()
             };
             if (id == null || id == 0)
             {
@@ -45,52 +46,61 @@ namespace BookyWeb.Areas.Admin.Controllers
             else
             {
                 //update
-                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id);
+                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id, includeProperties:"ProductImages");
                 return View(productVM);
             }
 
         }
         [HttpPost]
-        public IActionResult Upsert(ProductVM productVM, IFormFile? file)
+        public IActionResult Upsert(ProductVM productVM, List<IFormFile> files)
         {
             if (ModelState.IsValid)
             {
+                if (ModelState.IsValid)
+                {
+                    if (productVM.Product.Id == 0)
+                    {
+                        _unitOfWork.Product.Add(productVM.Product);
+                    }
+                    else
+                    {
+                        _unitOfWork.Product.Update(productVM.Product);
+                    }
+
+                    _unitOfWork.Save();
+                }
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
-                if (file != null)
+                if (files != null)
                 {
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    string productPart = Path.Combine(wwwRootPath, @"images/product");
-
-                    if (!string.IsNullOrEmpty(productVM.Product.ImageUrl))
+                    foreach(IFormFile file in files)
                     {
-                        //delete the old image
-                        var oldTmagePath = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        string productPath = @"images\products\product-" + productVM.Product.Id;
+                        string finalProductPart = Path.Combine(wwwRootPath, productPath);
 
-                        if (System.IO.File.Exists(oldTmagePath))
+                        if(!Directory.Exists(finalProductPart))
+                            Directory.CreateDirectory(finalProductPart);
+                        using (var fileStream = new FileStream(Path.Combine(finalProductPart, fileName), FileMode.Create))
                         {
-                            System.IO.File.Delete(oldTmagePath);
+                            file.CopyTo(fileStream);
                         }
+
+                        ProductImage image = new()
+                        {
+                            ImageURL = @"\" + productPath + @"\" + fileName,
+                            ProductId = productVM.Product.Id
+                        };
+
+                        if (productVM.Product.ProductImages == null)
+                            productVM.Product.ProductImages = new List<ProductImage>();
+
+                        productVM.Product.ProductImages.Add(image);
                     }
 
-                    using (var fileStream = new FileStream(Path.Combine(productPart, fileName), FileMode.Create))
-                    {
-                        file.CopyTo(fileStream);
-                    }
-
-                    productVM.Product.ImageUrl = @"\images\product\" + fileName;
-                }
-
-                if (productVM.Product.Id == 0)
-                {
-                    _unitOfWork.Product.Add(productVM.Product);
-                }
-                else
-                {
                     _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Save();
                 }
-
-                _unitOfWork.Save();
-                TempData["success"] = "Product created successfully";
+                TempData["success"] = "Product created/updated successfully";
                 return RedirectToAction("Index");
             }
             else
@@ -103,11 +113,37 @@ namespace BookyWeb.Areas.Admin.Controllers
                 return View(productVM);
             }
         }
+
+        public IActionResult DeleteImage(int imageId)
+        {
+            var imageToBeDeleted = _unitOfWork.ProductImage.Get(u => u.Id == imageId);
+            int prodId = imageToBeDeleted.ProductId;
+            if(imageToBeDeleted != null)
+            {
+                if (!string.IsNullOrEmpty(imageToBeDeleted.ImageURL))
+                {
+                    var oldTmagePath = Path.Combine(_webHostEnvironment.WebRootPath,
+                        imageToBeDeleted.ImageURL.TrimStart('\\'));
+
+                    if (System.IO.File.Exists(oldTmagePath))
+                    {
+                        System.IO.File.Delete(oldTmagePath);
+                    }
+                }
+                _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+                _unitOfWork.Save();
+
+                TempData["success"] = "Deleted successfully";
+            }
+            return RedirectToAction(nameof(Upsert), new {id = prodId});
+        }
+
+
         #region API CALLS
         [HttpGet]
         public IActionResult GetAll()
         {
-            List<Product> objCategoryList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+            List<Booky.Models.Product> objCategoryList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
             return Json(new {data = objCategoryList});
         }
 
@@ -115,20 +151,22 @@ namespace BookyWeb.Areas.Admin.Controllers
         public IActionResult Delete(int? id)
         {
             var productToBeDel = _unitOfWork.Product.Get(u => u.Id == id);
-            if(productToBeDel == null)
+            if (productToBeDel == null)
             {
-                return Json(new {success =  false, message = "Error while deleting"});
+                return Json(new { success = false, message = "Error while deleting" });
             }
+            string productPath = @"images\products\product-" + id;
+            string finalProductPart = Path.Combine(_webHostEnvironment.WebRootPath, productPath);
 
-
-            var oldTmagePath = Path.Combine(_webHostEnvironment.WebRootPath, 
-                productToBeDel.ImageUrl.TrimStart('\\'));
-
-            if (System.IO.File.Exists(oldTmagePath))
+            if (Directory.Exists(finalProductPart))
             {
-                System.IO.File.Delete(oldTmagePath);
+                string[] filePaths = Directory.GetFiles(finalProductPart);
+                foreach(string filePath in filePaths)
+                {
+                    System.IO.File.Delete(filePath);
+                }
+                Directory.Delete(finalProductPart);
             }
-
             _unitOfWork.Product.Remove(productToBeDel);
             _unitOfWork.Save();
 
