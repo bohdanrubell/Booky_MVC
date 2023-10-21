@@ -53,7 +53,7 @@
     <script>
         $(document).ready(function () {
             $('#User_Role').change(function () {
-                var selection = $('#User_Role option:selected').text();
+                var selection = $('#User_Role').val();
                 if (selection == 'Company') {
                     $('#User_CompanyId').show();
                 }

@@ -54,7 +54,6 @@ function loadDataTable() {
 
 
 function LockUnlock(id) {
-    console.log("UserID:" + id);
     $.ajax({
         type: "POST",
         url: '/Admin/User/LockUnlock',

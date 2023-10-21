@@ -18,7 +18,7 @@ namespace Booky.DataAccess.Repository
 
         public IShoppingCartRepository ShoppingCart { get; private set; }
 
-        public IProductImageRepository ProductImage { get; set; }
+        public IProductImageRepository ProductImage { get; private set; }
 
         public IApplicationUserRepository ApplicationUser { get; private set; }
 

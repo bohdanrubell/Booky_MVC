@@ -17,5 +17,10 @@ namespace Booky.DataAccess.Repository
         {
             _db = db;
         }
+
+        public void Update(ApplicationUser obj)
+        {
+            _db.ApplicationUsers.Update(obj);
+        }
     }
 }
